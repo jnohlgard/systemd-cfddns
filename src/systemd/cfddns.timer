@@ -1,9 +1,10 @@
 [Unit]
-Description=Run cfddns.service every minute
+Description=Run cfddns.service daily
 
 [Timer]
-OnCalendar=*:0/1
+OnCalendar=daily
+Persistent=true
 Unit=cfddns.service
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target
