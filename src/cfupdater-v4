@@ -1,10 +1,24 @@
 #!/bin/bash
 
 # Forked by benkulbertis/cloudflare-update-record.sh
-# CHANGE THESE
-api_token="YQSn-xWAQiiEh9qM58wZNnyQS7FUdoqGIUAbrh7T" # Create a token with edit Zone DNS permission on https://dash.cloudflare.com/profile/api-tokens
-zone_identifier="f1nd7h3fuck1n6z0n31d3n71f13r4l50"   # Can be found in the "Overview" tab of your domain
-record_name="ipv4.example.org"                       # Which record you want to be synced
+# Create an API token with edit Zone DNS permission on https://dash.cloudflare.com/profile/api-tokens
+# Zone ID can be found in the "Overview" tab of your domain
+if [ -z "${CF_API_TOKEN_FILE}" ]; then
+  >&2 printf 'Missing CF_API_TOKEN_FILE environment variable\n'
+  exit 1
+fi
+if [ -z "${CF_ZONE_ID}" ]; then
+  >&2 printf 'Missing CF_ZONE_ID environment variable\n'
+  exit 1
+fi
+if [ $# -ne 1 ]; then
+  >&2 printf 'Usage: %s <record_name>\n' "$0"
+  exit 1
+fi
+
+api_token=$(cat ${CF_API_TOKEN_FILE})
+zone_identifier=${CF_ZONE_ID}
+record_name=$1; shift
 
 # DO NOT CHANGE LINES BELOW
 ip=$(curl -s https://ipv4.icanhazip.com/)
