@@ -10,28 +10,28 @@ record_name="ipv4.example.org"                       # Which record you want to 
 ip=$(curl -s https://ipv4.icanhazip.com/)
 
 # SCRIPT START
-echo "[Cloudflare DDNS] Check Initiated"
+printf '[Cloudflare DDNS] Check Initiated\n'
 
 # Seek for the record
 record=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name" -H "Authorization: Bearer $api_token" -H "Content-Type: application/json")
 
 # Can't do anything without the record
-if [[ $record == *"\"count\":0"* ]]; then
-  >&2 echo -e "[Cloudflare DDNS] Record does not exist, perhaps create one first?"
+if printf '%s' "$record" | grep -q '"count":0'; then
+  >&2 printf '[Cloudflare DDNS] Record does not exist, perhaps create one first?\n'
   exit 1
 fi
 
 # Set existing IP address from the fetched record
-old_ip=$(echo "$record" | grep -Po '(?<="content":")[^"]*' | head -1)
+old_ip=$(printf '%s' "$record" | grep -Po '(?<="content":")[^"]*' | head -1)
 
 # Compare if they're the same
 if [ $ip == $old_ip ]; then
-  echo "[Cloudflare DDNS] IP has not changed."
+  printf '[Cloudflare DDNS] IP has not changed.\n'
   exit 0
 fi
 
 # Set the record identifier from result
-record_identifier=$(echo "$record" | grep -Po '(?<="id":")[^"]*' | head -1)
+record_identifier=$(printf '%s' "$record" | grep -Po '(?<="id":")[^"]*' | head -1)
 
 # The execution of update
 update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier" -H "Authorization: Bearer $api_token" -H "Content-Type: application/json" --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"proxied\":false,\"name\":\"$record_name\",\"content\":\"$ip\",\"ttl\":120}")
@@ -39,8 +39,10 @@ update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identi
 # The moment of truth
 case "$update" in
 *"\"success\":false"*)
-  >&2 echo -e "[Cloudflare DDNS] Update failed for $record_identifier. DUMPING RESULTS:\n$update"
-  exit 1;;
+  >&2 printf '[Cloudflare DDNS] Update failed for %s.\nResponse:\n%s\n' "$record_identifier" "$update"
+  exit 1
+  ;;
 *)
-  echo "[Cloudflare DDNS] IPv4 context '$ip' has been synced to Cloudflare.";;
+  printf '[Cloudflare DDNS] IPv4 address %s has been synced to Cloudflare.\n' "$ip"
+  ;;
 esac
