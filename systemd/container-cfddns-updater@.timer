@@ -1,0 +1,10 @@
+[Unit]
+Description=Run container-cfddns-updater@%i.service hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+Unit=container-cfddns-updater@%i.service
+
+[Install]
+WantedBy=timers.target
