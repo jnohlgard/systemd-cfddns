@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudflare DDNS updater for %i
+Documentation=https://github.com/jnohlgard/systemd-cfddns
+Wants=network.target
+After=network-online.target
+
+[Service]
+Environment=CF_ZONE_ID=YOUR_ZONE_ID
+Environment=CF_API_TOKEN_FILE=/path/to/secrets/cf_dns_api_token
+Restart=no
+ExecStart=/usr/local/bin/cfupdater.sh -4 %i
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target default.target
