@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -euxo pipefail
+set -euo pipefail
 
 # Create an API token with edit Zone DNS permission on https://dash.cloudflare.com/profile/api-tokens
 # Zone ID can be found in the "Overview" tab of your domain
